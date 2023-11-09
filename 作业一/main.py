@@ -116,7 +116,7 @@ RES_white = RES_white.T # 转制一遍之后是最终结果
 
 # 画图
 RES_df_white = pd.DataFrame(RES_white)
-RES_df_white.to_excel('my_white_RES.xlsx')
+# RES_df_white.to_excel('my_white_RES.xlsx')
 RES_df_white.columns = ['x', 'y']
 # print(RES_df)
 x3 = RES_df_white['x']
