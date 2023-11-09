@@ -68,7 +68,7 @@ z2 = np.dot(X, e2)
 # print(z2)
 
 # 输出降维后的结果（已去中心化）
-RES = np.array([z1, z2])
+RES = np.array([z2, z1])
 # print(RES)
 # print(RES.T)
 RES = RES.T # 转制一遍之后是最终结果
