@@ -18,12 +18,11 @@ y1 = data['y']
 
 #画图
 # plt.subplot(2, 2, 1)
-plt.scatter(x1,y1,color = 'c',marker = 'p')
+plt.scatter(x1,y1,color = 'c',marker = 'p', label = '原始数据')
 # plt.legend() #图例
-plt.title("随机数据散点图",fontsize = 14)
+# plt.title("随机数据散点图",fontsize = 14)
 plt.xlabel("x",fontsize = 12)
 plt.ylabel("y",fontsize = 12)
-plt.show()
 
 #--------任务(b)-------
 # 构造np.array类型的数据矩阵A
@@ -68,7 +67,7 @@ z2 = np.dot(X, e2)
 # print(z2)
 
 # 输出降维后的结果（已去中心化）
-RES = np.array([z2, z1])
+RES = np.array([z1, z2])
 # print(RES)
 # print(RES.T)
 RES = RES.T # 转制一遍之后是最终结果
@@ -83,12 +82,11 @@ x2 = RES_df['x']
 y2 = RES_df['y']
 
 # plt.subplot(2, 2, 2)
-plt.scatter(x2,y2,color = 'c',marker = 'p')
+plt.scatter(x2,y2,color = 'r',marker = 'p', label = 'PCA变换')
 # plt.legend() #图例
-plt.title("PCA变换散点图",fontsize = 14)
+# plt.title("PCA变换散点图",fontsize = 14)
 plt.xlabel("x",fontsize = 12)
 plt.ylabel("y",fontsize = 12)
-plt.show()
 
 #--------任务(c)-------
 new_W = W ** (-1 / 2)
@@ -123,9 +121,11 @@ x3 = RES_df_white['x']
 y3 = RES_df_white['y']
 
 # plt.subplot(2, 2, 3)
-plt.scatter(x3,y3,color = 'c',marker = 'p')
+plt.scatter(x3,y3,color = 'g',marker = 'p', label = '白化变换')
 # plt.legend() #图例
-plt.title("白化变换散点图",fontsize = 14)
+# plt.title("白化变换散点图",fontsize = 14)
 plt.xlabel("x",fontsize = 12)
 plt.ylabel("y",fontsize = 12)
+plt.legend()
+plt.title('手搓结果')
 plt.show()
