@@ -1,7 +1,7 @@
 {
   "configurations": [
     {
-      "name": "Mac",
+      "name": "macos-clang-arm64",
       "includePath": [
         "${workspaceFolder}/**",
         "/Users/plotnickslope/opencv/lib/lib/**",
@@ -10,9 +10,9 @@
       "defines": [],
       "macFrameworkPath": [],
       "compilerPath": "/opt/homebrew/Cellar/gcc/13.2.0/bin/gcc-13",
-      "cStandard": "gnu17",
-      "cppStandard": "gnu++17",
-      "intelliSenseMode": "macos-gcc-x64"
+      "cStandard": "${default}",
+      "cppStandard": "${default}",
+      "intelliSenseMode": "macos-clang-arm64"
     }
   ],
   "version": 4
