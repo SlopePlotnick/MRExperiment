@@ -19,8 +19,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/EigenFaces",
-      "program": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/EigenFaces/build/Debug/outDebug"
+      "cwd": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/Eigenfaces",
+      "program": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/Eigenfaces/build/Debug/outDebug"
     }
   ]
 }

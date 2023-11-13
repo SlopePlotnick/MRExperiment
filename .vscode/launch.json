@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/Fisherfaces",
+      "program": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/Fisherfaces/build/Debug/outDebug"
+    }
+  ]
+}
