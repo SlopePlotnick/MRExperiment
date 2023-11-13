@@ -1,6 +1,6 @@
 ---
 triple:          'arm64-apple-darwin'
-binary-path:     "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/FaceRecognition/main"
+binary-path:     "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/EigenFaces/main"
 relocations:
   - { offsetInCU: 0x113B4, offset: 0x113B4, size: 0x8, addend: 0x0, symName: __ZNSt3__124__put_character_sequenceB7v160006IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m, symObjAddr: 0x6994, symBinAddr: 0x100009E10, symSize: 0x1EC }
   - { offsetInCU: 0x12B72, offset: 0x12B72, size: 0x8, addend: 0x0, symName: __ZNSt3__1lsB7v160006IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_ostreamIT_T0_EES9_RKNS_12basic_stringIS6_S7_T1_EE, symObjAddr: 0x1438, symBinAddr: 0x1000048B4, symSize: 0x4C }
