@@ -2,12 +2,25 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "g++-13 - 生成和调试活动文件",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${fileDirname}/${fileBasenameNoExtension}",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb",
+      "preLaunchTask": "C/C++: g++-13 生成活动文件"
+    },
+    {
       "name": "C/C++ Runner: Debug Session",
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/Fisherfaces",
-      "program": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/Fisherfaces/build/Debug/outDebug"
+      "cwd": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/Eigenfaces",
+      "program": "/Users/plotnickslope/Desktop/学习资料/模式识别/作业/Eigenfaces/build/Debug/outDebug"
     }
   ]
 }
