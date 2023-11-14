@@ -1,0 +1,4 @@
+/Users/plotnickslope/Desktop/学习资料/模式识别/作业/FaceRecognition/cmake-build-debug/CMakeFiles/Eigenfaces.dir
+/Users/plotnickslope/Desktop/学习资料/模式识别/作业/FaceRecognition/cmake-build-debug/CMakeFiles/Fisherfaces.dir
+/Users/plotnickslope/Desktop/学习资料/模式识别/作业/FaceRecognition/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/plotnickslope/Desktop/学习资料/模式识别/作业/FaceRecognition/cmake-build-debug/CMakeFiles/rebuild_cache.dir
