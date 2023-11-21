@@ -1,17 +1,4 @@
 /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -S /Users/plotnickslope/Desktop/学习资料/模式识别/作业/FaceRecognition -B /Users/plotnickslope/Desktop/学习资料/模式识别/作业/FaceRecognition/cmake-build-debug
--- The C compiler identification is AppleClang 15.0.0.15000040
--- The CXX compiler identification is AppleClang 15.0.0.15000040
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Check for working C compiler: /usr/bin/clang - skipped
--- Detecting C compile features
--- Detecting C compile features - done
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /usr/bin/clang++ - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
--- Found OpenCV: /opt/homebrew/Cellar/opencv/4.8.1_2 (found version "4.8.1") 
--- Configuring done (0.7s)
+-- Configuring done (0.0s)
 -- Generating done (0.0s)
 -- Build files have been written to: /Users/plotnickslope/Desktop/学习资料/模式识别/作业/FaceRecognition/cmake-build-debug

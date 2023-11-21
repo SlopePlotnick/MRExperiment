@@ -13,4 +13,3 @@ add_executable(Fisherfaces Fisherfaces.cpp)
 
 target_link_libraries(Eigenfaces ${OpenCV_LIBS})
 target_link_libraries(Fisherfaces ${OpenCV_LIBS})
-

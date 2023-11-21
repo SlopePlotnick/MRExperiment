@@ -63,7 +63,7 @@ RES = RES.T # 转制一遍之后是最终结果
 RES_df = pd.DataFrame(RES)
 # RES_df.to_excel('my_RES.xlsx')
 RES_df.columns = ['x', 'y']
-x2 = RES_df['x']
+x2 = RES_df['x'] * (-1)
 y2 = RES_df['y']
 
 # 画图
