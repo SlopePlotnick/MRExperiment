@@ -7,6 +7,10 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import LeaveOneOut
 import math
 
+# 中文显示
+plt.rcParams["font.sans-serif"] = ["Hiragino Sans GB"] #解决中文字符乱码的问题
+plt.rcParams["axes.unicode_minus"] = False #正常显示负号
+
 #-----任务b-----
 plt.figure()
 # X: 符合对数正态分布的数据
