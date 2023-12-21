@@ -47,28 +47,62 @@ test_loader = torch.utils.data.DataLoader(
 # 最大汇合 nn.MaxPool2d(kernel_size=(2, 2), stride=2)
 # ReLu层 nn.ReLu(inplace = True)
 # 分类层 Softmax函数 nn.Softmax(dim = 1) dim = 1表示按行计算，dim = 0表示按列计算
+
+# BASE网络
 class BASE(nn.Module):
     def __init__(self):
         super(BASE, self).__init__()
         self.model = torch.nn.Sequential(
             # 第一层
-            torch.nn.Conv2d(in_channels=1, out_channels=20, kernel_size=(5, 5), stride=1, padding=0),
-            # torch.nn.ReLU(),
-            torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding = 0),
+            nn.Conv2d(in_channels=1, out_channels=20, kernel_size=(5, 5), stride=1, padding=0),
+            # nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding = 0),
 
             # 第二层
-            torch.nn.Conv2d(in_channels=20, out_channels=50, kernel_size=(5, 5), stride=1, padding=0),
-            # torch.nn.ReLU(),
-            torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding = 0),
+            nn.Conv2d(in_channels=20, out_channels=50, kernel_size=(5, 5), stride=1, padding=0),
+            # nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding = 0),
 
             # 第三层
-            torch.nn.Conv2d(in_channels=50, out_channels=500, kernel_size=(4, 4), stride=1, padding=0),
-            torch.nn.ReLU(inplace = True),
+            nn.Conv2d(in_channels=50, out_channels=500, kernel_size=(4, 4), stride=1, padding=0),
+            nn.ReLU(inplace = True),
 
             # 第四层
-            torch.nn.Flatten(),
-            torch.nn.Linear(in_features=500, out_features=10),
-            torch.nn.Softmax(dim=1)
+            nn.Flatten(),
+            nn.Linear(in_features=500, out_features=10),
+            nn.Softmax(dim=1)
+        )
+
+    def forward(self, input):
+        output = self.model(input)
+        return output
+
+# BN网络
+class BN(nn.Module):
+    def __init__(self):
+        super(BN, self).__init__()
+        self.model = torch.nn.Sequential(
+            # 第一层
+            nn.Conv2d(in_channels=1, out_channels=20, kernel_size=(5, 5), stride=1, padding=0),
+            # nn.ReLU(),
+            nn.BatchNorm2d(20),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding = 0),
+
+            # 第二层
+            nn.Conv2d(in_channels=20, out_channels=50, kernel_size=(5, 5), stride=1, padding=0),
+            # nn.ReLU(),
+            nn.BatchNorm2d(50),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding = 0),
+
+            # 第三层
+            nn.Conv2d(in_channels=50, out_channels=500, kernel_size=(4, 4), stride=1, padding=0),
+            nn.BatchNorm2d(500),
+            nn.ReLU(inplace = True),
+
+            # 第四层
+            nn.Flatten(),
+            nn.Linear(in_features=500, out_features=10),
+            nn.Softmax(dim=1)
         )
 
     def forward(self, input):
@@ -76,10 +110,10 @@ class BASE(nn.Module):
         return output
 
 # 网络初始化
-base = BASE()
+net = BN()
 # 构建迭代器与损失函数
 lossF = nn.CrossEntropyLoss() # 交叉熵损失
-optimizer = optim.Adam(base.parameters(), learning_rate) # Adam迭代器 学习率为之前设定的0.001
+optimizer = optim.Adam(net.parameters(), learning_rate) # Adam迭代器 学习率为之前设定的0.001
 
 # 存储训练过程
 history = {'Test Loss' : [], 'Test Accuracy' : []}
@@ -87,15 +121,15 @@ for epoch in range(1, n_epochs + 1):
     # 构建tqdm进度条
     processBar = tqdm(train_loader, unit = 'step')
     # 打开网络的训练模式
-    base.train(True)
+    net.train()
 
     # 开始对训练集的dataloader进行迭代
     for step, (train_imgs, labels) in enumerate(processBar):
         # --------------------------------训练代码--------------------------------
         # 清空模型梯度
-        base.zero_grad()
+        net.zero_grad()
         # 前向推理
-        outputs = base(train_imgs)
+        outputs = net(train_imgs)
 
         # 计算本轮损失
         loss = lossF(outputs, labels)
@@ -117,11 +151,11 @@ for epoch in range(1, n_epochs + 1):
             correct = 0 # 正确测试数量
             total_loss = 0 # 总损失
 
-            # 关闭模型训练状态
-            base.train(False)
+            # 打开网络的测试模式
+            net.eval()
             # 对测试集的dataloader迭代
             for test_imgs, labels in test_loader:
-                outputs = base(test_imgs)
+                outputs = net(test_imgs)
                 loss = lossF(outputs, labels)
                 predictions = torch.argmax(outputs, dim = 1)
 
