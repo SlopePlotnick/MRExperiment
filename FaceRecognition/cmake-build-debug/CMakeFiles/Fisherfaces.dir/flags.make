@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/clang++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -isystem /opt/homebrew/Cellar/opencv/4.8.1_2/include/opencv4
+CXX_INCLUDES = -isystem /opt/homebrew/Cellar/opencv/4.8.1_4/include/opencv4
 
 CXX_FLAGSarm64 = -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk -fcolor-diagnostics
 
