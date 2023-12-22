@@ -8,6 +8,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from tqdm import tqdm
 import numpy as np
+import pandas as pd
 
 # 超参数定义
 n_epochs = 20 # 训练参数的轮数
@@ -196,12 +197,17 @@ class SK(nn.Module):
         output = self.model(input)
         return output
 
-# 创建两张图 第一张为损失变化图 第二张为正确率变化图
-fig1, ax1 = plt.subplots()
-fig2, ax2 = plt.subplots()
+loss_matrix = pd.DataFrame([])
+accuracy_matrtix = pd.DataFrame([])
+idx = []
+for i in range(1, 21):
+    idx.append(i)
+idx.append('average')
+loss_matrix.index = idx;
+accuracy_matrtix.index = idx;
 
 # 统一化的训练和测试函数
-def train_and_test(name, s):
+def train_and_test(name, s, ax1, ax2):
     if name == 'SK':
         print('current model name: ' + name + '-' + str(s))
     else:
@@ -219,7 +225,8 @@ def train_and_test(name, s):
     optimizer = optim.Adam(net.parameters(), learning_rate)  # Adam迭代器 学习率为之前设定的0.001
 
     # 存储训练过程
-    history = {'Test Loss': [], 'Test Accuracy': []}
+    loss_history = np.array([])
+    accuracy_history = np.array([])
     for epoch in range(1, n_epochs + 1):
         # 构建tqdm进度条
         processBar = tqdm(train_loader, unit='step')
@@ -272,8 +279,8 @@ def train_and_test(name, s):
                 # 计算平均损失
                 test_loss = total_loss / len(test_loader)
                 # 存储历史数据
-                history['Test Loss'].append(test_loss.item())
-                history['Test Accuracy'].append(test_accuracy.item())
+                loss_history = np.append(loss_history, test_loss.item())
+                accuracy_history = np.append(accuracy_history, test_accuracy.item())
 
                 # 展示本轮测试结果
                 processBar.set_description("Test Loss: %.4f, Test Acc: %.4f" % (test_loss.item(), test_accuracy.item()))
@@ -282,33 +289,54 @@ def train_and_test(name, s):
 
     # 对测试Loss进行可视化
     if name == 'SK':
-        ax1.plot(history['Test Loss'], label = name + '-' + str(s))
+        ax1.plot(loss_history, label = name + '-' + str(s))
     else:
-        ax1.plot(history['Test Loss'], label = name)
+        ax1.plot(loss_history, label = name)
     ax1.legend(loc='best')
     ax1.grid(True)
     ax1.set_xlabel('Epoch')
     ax1.set_ylabel('Loss')
-    print('Average Loss: %.4f' % (np.mean(history['Test Loss'])))
+    print('Average Loss: %.4f' % (np.mean(loss_history)))
+    loss_history = np.append(loss_history, np.mean(loss_history))
+    if name == 'SK':
+        loss_matrix[name + '-' + str(s)] = loss_history
+    else:
+        loss_matrix[name] = loss_history
 
     # 对测试准确率进行可视化
     if name == 'SK':
-        ax2.plot(history['Test Accuracy'], label = name + '-' + str(s))
+        ax2.plot(accuracy_history, label = name + '-' + str(s))
     else:
-        ax2.plot(history['Test Accuracy'], label = name)
+        ax2.plot(accuracy_history, label = name)
     ax2.legend(loc='best')
     ax2.grid(True)
     ax2.set_xlabel('Epoch')
     ax2.set_ylabel('Accuracy')
-    print('Average Accuracy: %.4f' % (np.mean(history['Test Accuracy'])))
+    print('Average Accuracy: %.4f' % (np.mean(accuracy_history)))
+    accuracy_history = np.append(accuracy_history, np.mean(accuracy_history))
+    if name == 'SK':
+        accuracy_matrtix[name + '-' + str(s)] = accuracy_history
+    else:
+        accuracy_matrtix[name] = accuracy_history
+
+    print('----------------------------------------------------')
 
 model_list = ['BASE', 'BN', 'BASE_DROP', 'BN_DROP', 'SK']
+# 创建两张图 第一张为损失变化图 第二张为正确率变化图
+fig1, ax1 = plt.subplots()
+fig2, ax2 = plt.subplots()
 for name in model_list:
-    train_and_test(name, 1)
+    train_and_test(name, 1, ax1, ax2)
 plt.show()
 
 model_list = ['SK']
+# 另开两张图
+fig3, ax3 = plt.subplots()
+fig4, ax4 = plt.subplots()
 for name in model_list:
     for s in [2, 1.5, 1, 0.5, 0.2]:
-        train_and_test(name, s)
+        train_and_test(name, s, ax3, ax4)
 plt.show()
+
+loss_matrix.to_excel('损失.xlsx')
+accuracy_matrtix.to_excel('正确率.xlsx')
