@@ -109,85 +109,160 @@ class BN(nn.Module):
         output = self.model(input)
         return output
 
-# 网络初始化
-net = BN()
-# 构建迭代器与损失函数
-lossF = nn.CrossEntropyLoss() # 交叉熵损失
-optimizer = optim.Adam(net.parameters(), learning_rate) # Adam迭代器 学习率为之前设定的0.001
+class BASE_DROP(nn.Module):
+    def __init__(self):
+        super(BASE_DROP, self).__init__()
+        self.model = torch.nn.Sequential(
+            # 第一层
+            nn.Conv2d(in_channels=1, out_channels=20, kernel_size=(5, 5), stride=1, padding=0),
+            # nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding = 0),
 
-# 存储训练过程
-history = {'Test Loss' : [], 'Test Accuracy' : []}
-for epoch in range(1, n_epochs + 1):
-    # 构建tqdm进度条
-    processBar = tqdm(train_loader, unit = 'step')
-    # 打开网络的训练模式
-    net.train()
+            # 第二层
+            nn.Conv2d(in_channels=20, out_channels=50, kernel_size=(5, 5), stride=1, padding=0),
+            # nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding = 0),
 
-    # 开始对训练集的dataloader进行迭代
-    for step, (train_imgs, labels) in enumerate(processBar):
-        # --------------------------------训练代码--------------------------------
-        # 清空模型梯度
-        net.zero_grad()
-        # 前向推理
-        outputs = net(train_imgs)
+            # 第三层
+            nn.Conv2d(in_channels=50, out_channels=500, kernel_size=(4, 4), stride=1, padding=0),
+            nn.ReLU(inplace = True),
 
-        # 计算本轮损失
-        loss = lossF(outputs, labels)
-        # 计算本轮准确率
-        predictions = torch.argmax(outputs, dim = 1)
-        accuracy = torch.sum(predictions == labels) / labels.shape[0]
+            # 第四层
+            nn.Flatten(),
+            nn.Linear(in_features=500, out_features=10),
+            nn.Dropout(p = 0.2),
+            nn.Softmax(dim=1)
+        )
 
-        # 反向传播求出模型参数的梯度
-        loss.backward()
-        # 使用迭代器更新模型权重
-        optimizer.step()
+    def forward(self, input):
+        output = self.model(input)
+        return output
 
-        # 将本step结果进行可视化处理
-        processBar.set_description("[%d/%d] Loss: %.4f, Acc: %.4f" % (epoch, n_epochs, loss.item(), accuracy.item()))
+class BN_DROP(nn.Module):
+    def __init__(self):
+        super(BN_DROP, self).__init__()
+        self.model = torch.nn.Sequential(
+            # 第一层
+            nn.Conv2d(in_channels=1, out_channels=20, kernel_size=(5, 5), stride=1, padding=0),
+            # nn.ReLU(),
+            nn.BatchNorm2d(20),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding=0),
 
-        #--------------------------------测试代码--------------------------------
-        # 最后一次训练完成后
-        if step == len(processBar) - 1:
-            correct = 0 # 正确测试数量
-            total_loss = 0 # 总损失
+            # 第二层
+            nn.Conv2d(in_channels=20, out_channels=50, kernel_size=(5, 5), stride=1, padding=0),
+            # nn.ReLU(),
+            nn.BatchNorm2d(50),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding=0),
 
-            # 打开网络的测试模式
-            net.eval()
-            # 对测试集的dataloader迭代
-            for test_imgs, labels in test_loader:
-                outputs = net(test_imgs)
-                loss = lossF(outputs, labels)
-                predictions = torch.argmax(outputs, dim = 1)
+            # 第三层
+            nn.Conv2d(in_channels=50, out_channels=500, kernel_size=(4, 4), stride=1, padding=0),
+            nn.BatchNorm2d(500),
+            nn.ReLU(inplace=True),
 
-                # 存储测试结果
-                total_loss += loss
-                correct += torch.sum(predictions == labels)
+            # 第四层
+            nn.Flatten(),
+            nn.Linear(in_features=500, out_features=10),
+            nn.Dropout(p=0.2),
+            nn.Softmax(dim=1)
+        )
 
-            # 计算平均准确率
-            test_accuracy = correct / (batch_size_test * len(test_loader))
-            # 计算平均损失
-            test_loss = total_loss / len(test_loader)
-            # 存储历史数据
-            history['Test Loss'].append(test_loss.item())
-            history['Test Accuracy'].append(test_accuracy.item())
+    def forward(self, input):
+        output = self.model(input)
+        return output
 
-            # 展示本轮测试结果
-            processBar.set_description("Test Loss: %.4f, Test Acc: %.4f" % (test_loss.item(), test_accuracy.item()))
+# 创建两张图 第一张为损失变化图 第二张为正确率变化图
+fig1, ax1 = plt.subplots()
+fig2, ax2 = plt.subplots()
 
-    processBar.close()
+# 统一化的训练和测试函数
+def train_and_test(name):
+    print("current model name:" + name)
+    # 全局搜索网络类名称
+    network = globals().get(name)
 
-#对测试Loss进行可视化
-plt.plot(history['Test Loss'],label = 'Test Loss')
-plt.legend(loc='best')
-plt.grid(True)
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.show()
+    # 网络初始化
+    net = network()
+    # 构建迭代器与损失函数
+    lossF = nn.CrossEntropyLoss()  # 交叉熵损失
+    optimizer = optim.Adam(net.parameters(), learning_rate)  # Adam迭代器 学习率为之前设定的0.001
 
-#对测试准确率进行可视化
-plt.plot(history['Test Accuracy'],color = 'red',label = 'Test Accuracy')
-plt.legend(loc='best')
-plt.grid(True)
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
+    # 存储训练过程
+    history = {'Test Loss': [], 'Test Accuracy': []}
+    for epoch in range(1, n_epochs + 1):
+        # 构建tqdm进度条
+        processBar = tqdm(train_loader, unit='step')
+        # 打开网络的训练模式
+        net.train()
+
+        # 开始对训练集的dataloader进行迭代
+        for step, (train_imgs, labels) in enumerate(processBar):
+            # --------------------------------训练代码--------------------------------
+            # 清空模型梯度
+            net.zero_grad()
+            # 前向推理
+            outputs = net(train_imgs)
+
+            # 计算本轮损失
+            loss = lossF(outputs, labels)
+            # 计算本轮准确率
+            predictions = torch.argmax(outputs, dim=1)
+            accuracy = torch.sum(predictions == labels) / labels.shape[0]
+
+            # 反向传播求出模型参数的梯度
+            loss.backward()
+            # 使用迭代器更新模型权重
+            optimizer.step()
+
+            # 将本step结果进行可视化处理
+            processBar.set_description(
+                "[%d/%d] Loss: %.4f, Acc: %.4f" % (epoch, n_epochs, loss.item(), accuracy.item()))
+
+            # --------------------------------测试代码--------------------------------
+            # 最后一次训练完成后
+            if step == len(processBar) - 1:
+                correct = 0  # 正确测试数量
+                total_loss = 0  # 总损失
+
+                # 打开网络的测试模式
+                net.eval()
+                # 对测试集的dataloader迭代
+                for test_imgs, labels in test_loader:
+                    outputs = net(test_imgs)
+                    loss = lossF(outputs, labels)
+                    predictions = torch.argmax(outputs, dim=1)
+
+                    # 存储测试结果
+                    total_loss += loss
+                    correct += torch.sum(predictions == labels)
+
+                # 计算平均准确率
+                test_accuracy = correct / (batch_size_test * len(test_loader))
+                # 计算平均损失
+                test_loss = total_loss / len(test_loader)
+                # 存储历史数据
+                history['Test Loss'].append(test_loss.item())
+                history['Test Accuracy'].append(test_accuracy.item())
+
+                # 展示本轮测试结果
+                processBar.set_description("Test Loss: %.4f, Test Acc: %.4f" % (test_loss.item(), test_accuracy.item()))
+
+        processBar.close()
+
+    # 对测试Loss进行可视化
+    ax1.plot(history['Test Loss'], label = name + ':' + 'Test Loss')
+    ax1.legend(loc='best')
+    ax1.grid(True)
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylabel('Loss')
+
+    # 对测试准确率进行可视化
+    ax2.plot(history['Test Accuracy'], label = name + ':' + 'Test Accuracy')
+    ax2.legend(loc='best')
+    ax2.grid(True)
+    ax2.set_xlabel('Epoch')
+    ax2.set_ylabel('Accuracy')
+
+model_list = ['BASE', 'BN', 'BASE_DROP', 'BN_DROP']
+for name in model_list:
+    train_and_test(name)
 plt.show()
