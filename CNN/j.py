@@ -16,7 +16,8 @@ batch_size_test = 100 # 测试集的batchsize
 learning_rate = 0.001 # 学习率 控制每次更新只采用负梯度的一小部分
 # momentum = 0.5 # 优化器超参数？
 # log_interval = 10 # ？
-random_seed = 0 # 为任何使用随机数产生的东西设置随机种子
+
+random_seed = 0  # 为任何使用随机数产生的东西设置随机种子
 torch.manual_seed(random_seed)
 
 mnist = torchvision.datasets.MNIST('./data/', train=True, download=False,
@@ -25,6 +26,22 @@ mnist = torchvision.datasets.MNIST('./data/', train=True, download=False,
                                torchvision.transforms.Normalize(
                                    (0.1307,), (0.3081,))
                            ]))
+
+# 选取前10000条数据进行训练
+train_set = Subset(mnist, range(10000))
+# MNIST数据集的dataloader 数据将自动下载至目录的data文件夹
+# 其中的0.1307和0.3081是MNIST数据集的全局平均值和标准偏差 用来作标准化
+train_loader = torch.utils.data.DataLoader(
+    train_set,
+    batch_size=batch_size_train, shuffle=True)
+test_loader = torch.utils.data.DataLoader(
+    torchvision.datasets.MNIST('./data/', train=False, download=False,
+                               transform=torchvision.transforms.Compose([
+                                   torchvision.transforms.ToTensor(),
+                                   torchvision.transforms.Normalize(
+                                       (0.1307,), (0.3081,))
+                               ])),
+    batch_size=batch_size_test, shuffle=True)
 
 # 网络构建
 # 在此列出作业要求
@@ -180,6 +197,39 @@ class SK(nn.Module):
         output = self.model(input)
         return output
 
+class SK_SIG(nn.Module):
+    def __init__(self, s):
+        super(SK_SIG, self).__init__()
+        self.model = torch.nn.Sequential(
+            # 第一层
+            nn.Conv2d(in_channels=1, out_channels=int(20 * s), kernel_size=(3, 3), stride=1, padding=0),
+            nn.BatchNorm2d(int(20 * s)),
+            nn.Sigmoid(),
+            nn.Conv2d(in_channels=int(20 * s), out_channels=int(20 * s), kernel_size=(3, 3), stride=1, padding=0),
+            nn.BatchNorm2d(int(20 * s)),
+            nn.Sigmoid(),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding=0),
+
+            # 第二层
+            nn.Conv2d(in_channels=int(20 * s), out_channels=int(50 * s), kernel_size=(5, 5), stride=1, padding=0),
+            nn.BatchNorm2d(int(50 * s)),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=2, padding=0),
+
+            # 第三层
+            nn.Conv2d(in_channels=int(50 * s), out_channels=int(500 * s), kernel_size=(4, 4), stride=1, padding=0),
+            nn.BatchNorm2d(int(500 * s)),
+            nn.Sigmoid(),
+
+            # 第四层
+            nn.Flatten(),
+            nn.Linear(in_features=int(500 * s), out_features=10),
+            nn.Softmax(dim=1)
+        )
+
+    def forward(self, input):
+        output = self.model(input)
+        return output
+
 loss_matrix = pd.DataFrame([])
 accuracy_matrtix = pd.DataFrame([])
 idx = []
@@ -190,17 +240,16 @@ loss_matrix.index = idx
 accuracy_matrtix.index = idx
 
 # 统一化的训练和测试函数
-def train_and_test(name, s, ax1, ax2, i):
-    if name == 'SK':
+def train_and_test(name, s, ax1, ax2):
+    if name == 'SK' or name == 'SK_SIG':
         print('current model name: ' + name + '-' + str(s))
     else:
         print("current model name:" + name)
-    print("current training data is the %d 10000 from MNIST" % (i))
     # 全局搜索网络类名称
     network = globals().get(name)
 
     # 网络初始化
-    if name == 'SK':
+    if name == 'SK' or name == 'SK_SIG':
         net = network(s)
     else:
         net = network()
@@ -272,62 +321,45 @@ def train_and_test(name, s, ax1, ax2, i):
         processBar.close()
 
     # 对测试Loss进行可视化
-    if name == 'SK':
-        ax1.plot(loss_history, label = str(i))
+    if name == 'SK' or name == 'SK_SIG':
+        ax1.plot(loss_history, label = name + '-' + str(s))
     else:
-        ax1.plot(loss_history, label = str(i))
+        ax1.plot(loss_history, label = name)
     ax1.legend(loc='best')
     ax1.grid(True)
     ax1.set_xlabel('Epoch')
     ax1.set_ylabel('Loss')
     print('Average Loss: %.4f' % (np.mean(loss_history)))
     loss_history = np.append(loss_history, np.mean(loss_history))
-    if name == 'SK':
-        loss_matrix[str(i)] = loss_history
+    if name == 'SK' or name == 'SK_SIG':
+        loss_matrix[name + '-' + str(s)] = loss_history
     else:
-        loss_matrix[str(i)] = loss_history
+        loss_matrix[name] = loss_history
 
     # 对测试准确率进行可视化
-    if name == 'SK':
-        ax2.plot(accuracy_history, label = str(i))
+    if name == 'SK' or name == 'SK_SIG':
+        ax2.plot(accuracy_history, label = name + '-' + str(s))
     else:
-        ax2.plot(accuracy_history, label = str(i))
+        ax2.plot(accuracy_history, label = name)
     ax2.legend(loc='best')
     ax2.grid(True)
     ax2.set_xlabel('Epoch')
     ax2.set_ylabel('Accuracy')
     print('Average Accuracy: %.4f' % (np.mean(accuracy_history)))
     accuracy_history = np.append(accuracy_history, np.mean(accuracy_history))
-    if name == 'SK':
-        accuracy_matrtix[str(i)] = accuracy_history
+    if name == 'SK' or name == 'SK_SIG':
+        accuracy_matrtix[name + '-' + str(s)] = accuracy_history
     else:
-        accuracy_matrtix[str(i)] = accuracy_history
+        accuracy_matrtix[name] = accuracy_history
 
     print('----------------------------------------------------')
 
 # 创建两张图 第一张为损失变化图 第二张为正确率变化图
 fig1, ax1 = plt.subplots()
 fig2, ax2 = plt.subplots()
-for i in range(1, 7):
-    # 选取前num条数据进行训练
-    train_set = Subset(mnist, range(10000 * (i - 1), 10000 * i))
-
-    # MNIST数据集的dataloader 数据将自动下载至目录的data文件夹
-    # 其中的0.1307和0.3081是MNIST数据集的全局平均值和标准偏差 用来作标准化
-    train_loader = torch.utils.data.DataLoader(
-        train_set,
-        batch_size=batch_size_train, shuffle=True)
-    test_loader = torch.utils.data.DataLoader(
-        torchvision.datasets.MNIST('./data/', train=False, download=False,
-                                   transform=torchvision.transforms.Compose([
-                                       torchvision.transforms.ToTensor(),
-                                       torchvision.transforms.Normalize(
-                                           (0.1307,), (0.3081,))
-                                   ])),
-        batch_size=batch_size_test, shuffle=True)
-
-    train_and_test('SK', 0.2, ax1, ax2, i)
+for name in ['SK', 'SK_SIG']:
+    train_and_test(name, 0.2, ax1, ax2)
 plt.show()
 
-loss_matrix.to_excel('h损失.xlsx')
-accuracy_matrtix.to_excel('h正确率.xlsx')
+loss_matrix.to_excel('j损失.xlsx')
+accuracy_matrtix.to_excel('j正确率.xlsx')

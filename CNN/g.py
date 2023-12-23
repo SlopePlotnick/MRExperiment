@@ -330,5 +330,5 @@ for num in num_list:
     train_and_test('SK', 0.2, ax1, ax2, num)
 plt.show()
 
-loss_matrix.to_excel('SK-2损失.xlsx')
-accuracy_matrtix.to_excel('SK-2正确率.xlsx')
+loss_matrix.to_excel('g损失.xlsx')
+accuracy_matrtix.to_excel('g正确率.xlsx')

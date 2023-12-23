@@ -337,5 +337,5 @@ for name in model_list:
         train_and_test(name, s, ax3, ax4)
 plt.show()
 
-loss_matrix.to_excel('损失.xlsx')
-accuracy_matrtix.to_excel('正确率.xlsx')
+loss_matrix.to_excel('a2f损失.xlsx')
+accuracy_matrtix.to_excel('a2f正确率.xlsx')

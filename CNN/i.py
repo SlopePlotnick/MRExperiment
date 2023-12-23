@@ -16,8 +16,6 @@ batch_size_test = 100 # 测试集的batchsize
 learning_rate = 0.001 # 学习率 控制每次更新只采用负梯度的一小部分
 # momentum = 0.5 # 优化器超参数？
 # log_interval = 10 # ？
-random_seed = 0 # 为任何使用随机数产生的东西设置随机种子
-torch.manual_seed(random_seed)
 
 mnist = torchvision.datasets.MNIST('./data/', train=True, download=False,
                            transform=torchvision.transforms.Compose([
@@ -195,7 +193,7 @@ def train_and_test(name, s, ax1, ax2, i):
         print('current model name: ' + name + '-' + str(s))
     else:
         print("current model name:" + name)
-    print("current training data is the %d 10000 from MNIST" % (i))
+    print("current random seed is %d" % (i))
     # 全局搜索网络类名称
     network = globals().get(name)
 
@@ -308,9 +306,12 @@ def train_and_test(name, s, ax1, ax2, i):
 # 创建两张图 第一张为损失变化图 第二张为正确率变化图
 fig1, ax1 = plt.subplots()
 fig2, ax2 = plt.subplots()
-for i in range(1, 7):
-    # 选取前num条数据进行训练
-    train_set = Subset(mnist, range(10000 * (i - 1), 10000 * i))
+for i in [0, 1, 12, 123, 1234, 12345, 123456]:
+    # 选取前10000条数据进行训练
+    train_set = Subset(mnist, range(10000))
+
+    random_seed = i  # 为任何使用随机数产生的东西设置随机种子
+    torch.manual_seed(random_seed)
 
     # MNIST数据集的dataloader 数据将自动下载至目录的data文件夹
     # 其中的0.1307和0.3081是MNIST数据集的全局平均值和标准偏差 用来作标准化
@@ -329,5 +330,5 @@ for i in range(1, 7):
     train_and_test('SK', 0.2, ax1, ax2, i)
 plt.show()
 
-loss_matrix.to_excel('h损失.xlsx')
-accuracy_matrtix.to_excel('h正确率.xlsx')
+loss_matrix.to_excel('i损失.xlsx')
+accuracy_matrtix.to_excel('i正确率.xlsx')
