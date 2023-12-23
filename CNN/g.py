@@ -4,7 +4,6 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Subset
 import matplotlib.pyplot as plt
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from tqdm import tqdm
 import numpy as np
@@ -26,22 +25,6 @@ mnist = torchvision.datasets.MNIST('./data/', train=True, download=False,
                                torchvision.transforms.Normalize(
                                    (0.1307,), (0.3081,))
                            ]))
-# 选取前10000条数据进行训练
-train_set = Subset(mnist, range(10000))
-
-# MNIST数据集的dataloader 数据将自动下载至目录的data文件夹
-# 其中的0.1307和0.3081是MNIST数据集的全局平均值和标准偏差 用来作标准化
-train_loader = torch.utils.data.DataLoader(
-    train_set,
-    batch_size=batch_size_train, shuffle=True)
-test_loader = torch.utils.data.DataLoader(
-    torchvision.datasets.MNIST('./data/', train=False, download=False,
-                               transform=torchvision.transforms.Compose([
-                                   torchvision.transforms.ToTensor(),
-                                   torchvision.transforms.Normalize(
-                                       (0.1307,), (0.3081,))
-                               ])),
-    batch_size=batch_size_test, shuffle=True)
 
 # 网络构建
 # 在此列出作业要求
@@ -200,18 +183,19 @@ class SK(nn.Module):
 loss_matrix = pd.DataFrame([])
 accuracy_matrtix = pd.DataFrame([])
 idx = []
-for i in range(1, 21):
+for i in range(1, n_epochs + 1):
     idx.append(i)
 idx.append('average')
-loss_matrix.index = idx;
-accuracy_matrtix.index = idx;
+loss_matrix.index = idx
+accuracy_matrtix.index = idx
 
 # 统一化的训练和测试函数
-def train_and_test(name, s, ax1, ax2):
+def train_and_test(name, s, ax1, ax2, num):
     if name == 'SK':
         print('current model name: ' + name + '-' + str(s))
     else:
         print("current model name:" + name)
+    print("current training data is the first %d from MNIST" % (num))
     # 全局搜索网络类名称
     network = globals().get(name)
 
@@ -289,9 +273,9 @@ def train_and_test(name, s, ax1, ax2):
 
     # 对测试Loss进行可视化
     if name == 'SK':
-        ax1.plot(loss_history, label = name + '-' + str(s))
+        ax1.plot(loss_history, label = str(num))
     else:
-        ax1.plot(loss_history, label = name)
+        ax1.plot(loss_history, label = str(num))
     ax1.legend(loc='best')
     ax1.grid(True)
     ax1.set_xlabel('Epoch')
@@ -299,15 +283,15 @@ def train_and_test(name, s, ax1, ax2):
     print('Average Loss: %.4f' % (np.mean(loss_history)))
     loss_history = np.append(loss_history, np.mean(loss_history))
     if name == 'SK':
-        loss_matrix[name + '-' + str(s)] = loss_history
+        loss_matrix[str(num)] = loss_history
     else:
-        loss_matrix[name] = loss_history
+        loss_matrix[str(num)] = loss_history
 
     # 对测试准确率进行可视化
     if name == 'SK':
-        ax2.plot(accuracy_history, label = name + '-' + str(s))
+        ax2.plot(accuracy_history, label = str(num))
     else:
-        ax2.plot(accuracy_history, label = name)
+        ax2.plot(accuracy_history, label = str(num))
     ax2.legend(loc='best')
     ax2.grid(True)
     ax2.set_xlabel('Epoch')
@@ -315,28 +299,36 @@ def train_and_test(name, s, ax1, ax2):
     print('Average Accuracy: %.4f' % (np.mean(accuracy_history)))
     accuracy_history = np.append(accuracy_history, np.mean(accuracy_history))
     if name == 'SK':
-        accuracy_matrtix[name + '-' + str(s)] = accuracy_history
+        accuracy_matrtix[str(num)] = accuracy_history
     else:
-        accuracy_matrtix[name] = accuracy_history
+        accuracy_matrtix[str(num)] = accuracy_history
 
     print('----------------------------------------------------')
 
-model_list = ['BASE', 'BN', 'BASE_DROP', 'BN_DROP', 'SK']
+num_list = [500, 1000, 2000, 5000, 10000, 20000, 60000]
 # 创建两张图 第一张为损失变化图 第二张为正确率变化图
 fig1, ax1 = plt.subplots()
 fig2, ax2 = plt.subplots()
-for name in model_list:
-    train_and_test(name, 1, ax1, ax2)
+for num in num_list:
+    # 选取前num条数据进行训练
+    train_set = Subset(mnist, range(num))
+
+    # MNIST数据集的dataloader 数据将自动下载至目录的data文件夹
+    # 其中的0.1307和0.3081是MNIST数据集的全局平均值和标准偏差 用来作标准化
+    train_loader = torch.utils.data.DataLoader(
+        train_set,
+        batch_size=batch_size_train, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.MNIST('./data/', train=False, download=False,
+                                   transform=torchvision.transforms.Compose([
+                                       torchvision.transforms.ToTensor(),
+                                       torchvision.transforms.Normalize(
+                                           (0.1307,), (0.3081,))
+                                   ])),
+        batch_size=batch_size_test, shuffle=True)
+
+    train_and_test('SK', 0.2, ax1, ax2, num)
 plt.show()
 
-model_list = ['SK']
-# 另开两张图
-fig3, ax3 = plt.subplots()
-fig4, ax4 = plt.subplots()
-for name in model_list:
-    for s in [2, 1.5, 1, 0.5, 0.2]:
-        train_and_test(name, s, ax3, ax4)
-plt.show()
-
-loss_matrix.to_excel('损失.xlsx')
-accuracy_matrtix.to_excel('正确率.xlsx')
+loss_matrix.to_excel('SK-2损失.xlsx')
+accuracy_matrtix.to_excel('SK-2正确率.xlsx')
